@@ -1,5 +1,6 @@
 import uuid
 from collections.abc import Sequence
+from datetime import datetime, timezone
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -29,7 +30,7 @@ class ParticipantRepository:
     def list_ranked(self, limit: int, offset: int) -> Sequence[Participant]:
         stmt = (
             select(Participant)
-            .order_by(Participant.score.desc(), Participant.nickname.asc())
+            .order_by(Participant.score.desc(), Participant.score_updated_at.asc())
             .limit(limit)
             .offset(offset)
         )
@@ -40,7 +41,7 @@ class ParticipantRepository:
             return []
         stmt = (
             select(Participant)
-            .order_by(Participant.score.desc(), Participant.nickname.asc())
+            .order_by(Participant.score.desc(), Participant.score_updated_at.asc())
             .limit(max_rows)
         )
         return self._session.scalars(stmt).all()
@@ -50,6 +51,7 @@ class ParticipantRepository:
         if p is None:
             return False
         p.score = int(p.score) + delta
+        p.score_updated_at = datetime.now(timezone.utc)
         self._session.add(p)
         self._session.commit()
         return True

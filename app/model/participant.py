@@ -31,3 +31,8 @@ class Participant(Base):
         onupdate=func.now(),
         nullable=False,
     )
+    score_updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )

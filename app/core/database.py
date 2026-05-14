@@ -36,6 +36,7 @@ def init_db() -> None:
         return
     Base.metadata.create_all(bind=engine)
     _ensure_participant_score_column()
+    _ensure_score_updated_at_column()
 
 
 def _ensure_participant_score_column() -> None:
@@ -52,6 +53,24 @@ def _ensure_participant_score_column() -> None:
         conn.execute(
             text(
                 "ALTER TABLE participants ADD COLUMN score INTEGER NOT NULL DEFAULT 0"
+            )
+        )
+
+
+def _ensure_score_updated_at_column() -> None:
+    """Adiciona score_updated_at para desempate por ordem de conquista."""
+    if engine is None:
+        return
+    insp = inspect(engine)
+    if not insp.has_table("participants"):
+        return
+    colnames = {c["name"] for c in insp.get_columns("participants")}
+    if "score_updated_at" in colnames:
+        return
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                "ALTER TABLE participants ADD COLUMN score_updated_at TIMESTAMPTZ NOT NULL DEFAULT now()"
             )
         )
 
