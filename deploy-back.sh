@@ -24,13 +24,14 @@ echo "==> Build da imagem"
 sudo docker build -t back-warner .
 
 echo "==> Iniciando container"
+DOCKER_ENV=(-e "DATABASE_URL=$DATABASE_URL" -e "APP_SECRET=$APP_SECRET")
+[ -n "$CORS_ORIGINS" ] && DOCKER_ENV+=(-e "CORS_ORIGINS=$CORS_ORIGINS")
+
 sudo docker run -d \
   --name back-warner \
   -p 8001:8000 \
   --restart always \
-  -e DATABASE_URL="$DATABASE_URL" \
-  -e CORS_ORIGINS="$CORS_ORIGINS" \
-  -e APP_SECRET="$APP_SECRET" \
+  "${DOCKER_ENV[@]}" \
   back-warner
 
 echo "==> Logs (Ctrl+C para sair)"

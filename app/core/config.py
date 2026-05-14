@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -6,6 +7,11 @@ from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BACK_DIR = Path(__file__).resolve().parents[2]
+
+# pydantic_settings 2.6.x chama json.loads() em campos list[str] antes do validator,
+# então CORS_ORIGINS="" quebra o boot. Remove do env se estiver vazio.
+if not os.environ.get("CORS_ORIGINS", "").strip():
+    os.environ.pop("CORS_ORIGINS", None)
 
 
 class Settings(BaseSettings):
