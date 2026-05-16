@@ -27,6 +27,15 @@ def answer_history(
     return service.list_answer_history(limit, offset, participant_id)
 
 
+@router.get("/session", response_model=list[QuestionShufflePublic])
+def session_questions(
+    count: int = Query(10, ge=1, le=20),
+    service: QuestionService = Depends(get_question_service),
+) -> list[QuestionShufflePublic]:
+    """Retorna `count` perguntas distintas de uma só vez; nunca repete dentro da mesma chamada."""
+    return service.session_questions(count)
+
+
 @router.get("/random", response_model=QuestionShufflePublic)
 def random_question(
     service: QuestionService = Depends(get_question_service),

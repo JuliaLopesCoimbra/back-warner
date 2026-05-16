@@ -17,5 +17,9 @@ class QuestionRepository:
         stmt = select(Question).order_by(func.random()).limit(1)
         return self._session.scalar(stmt)
 
+    def get_n_distinct(self, n: int) -> list[Question]:
+        stmt = select(Question).order_by(func.random()).limit(n)
+        return list(self._session.scalars(stmt))
+
     def get_by_id(self, qid: uuid.UUID) -> Question | None:
         return self._session.get(Question, qid)
