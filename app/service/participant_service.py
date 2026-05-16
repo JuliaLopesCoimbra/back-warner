@@ -33,6 +33,10 @@ class ParticipantService:
         )
 
     def register(self, body: ParticipantCreateRequest) -> ParticipantCreateResponse:
+        if self._repo.find_by_name(body.nickname.strip()) is not None:
+            raise HTTPException(
+                status_code=409, detail="Já existe um participante com esse nome."
+            )
         try:
             p = self._repo.create(nickname=body.nickname)
         except ValueError as e:
