@@ -14,5 +14,9 @@ class SuperFaQuestionRepository:
         stmt = select(SuperFaQuestion).order_by(func.random()).limit(1)
         return self._session.scalar(stmt)
 
+    def get_n_distinct(self, n: int) -> list[SuperFaQuestion]:
+        stmt = select(SuperFaQuestion).order_by(func.random()).limit(n)
+        return list(self._session.scalars(stmt))
+
     def get_by_id(self, qid: uuid.UUID) -> SuperFaQuestion | None:
         return self._session.get(SuperFaQuestion, qid)

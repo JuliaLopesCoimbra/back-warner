@@ -56,6 +56,26 @@ class SuperFaQuestionService:
             layout_token=token,
         )
 
+    def session_questions(self, count: int) -> list[QuestionShufflePublic]:
+        questions = self._repo.get_n_distinct(count)
+        if not questions:
+            raise HTTPException(
+                status_code=404,
+                detail="Nenhuma pergunta Super FA cadastrada. Rode o SQL de seed.",
+            )
+        result: list[QuestionShufflePublic] = []
+        for q in questions:
+            texts = [q.option_a, q.option_b, q.option_c, q.option_d]
+            perm = [0, 1, 2, 3]
+            secrets.SystemRandom().shuffle(perm)
+            options: list[ShuffledOption] = []
+            for slot, orig_idx in enumerate(perm):
+                letter = chr(ord("A") + slot)
+                options.append(ShuffledOption(letter=letter, text=texts[orig_idx]))
+            token = sign_layout(q.id, perm, settings.app_secret)
+            result.append(QuestionShufflePublic(id=q.id, prompt=q.prompt, options=options, layout_token=token))
+        return result
+
     def check_answer(self, question_id: UUID, body: AnswerSubmit) -> AnswerResult:
         try:
             token_qid, perm = verify_layout(body.layout_token, settings.app_secret)

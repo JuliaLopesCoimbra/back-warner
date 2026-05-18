@@ -8,6 +8,7 @@ from app.schema.question_schema import (
     QuestionShufflePublic,
     SuperFaAnswerHistoryResponse,
 )
+from typing import List
 from app.service.super_fa_question_service import (
     SuperFaQuestionService,
     get_super_fa_question_service,
@@ -24,6 +25,15 @@ def super_fa_answer_history(
 ) -> SuperFaAnswerHistoryResponse:
     """Histórico de tentativas (Super FA / Super Quiz): pergunta, resposta e horário."""
     return service.list_answer_history(limit, offset)
+
+
+@router.get("/session", response_model=List[QuestionShufflePublic])
+def super_fa_session_questions(
+    count: int = Query(5, ge=1, le=10),
+    service: SuperFaQuestionService = Depends(get_super_fa_question_service),
+) -> List[QuestionShufflePublic]:
+    """Retorna N perguntas distintas do Super Quiz para uma sessão."""
+    return service.session_questions(count)
 
 
 @router.get("/random", response_model=QuestionShufflePublic)
